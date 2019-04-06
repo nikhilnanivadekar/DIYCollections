@@ -1,5 +1,7 @@
 package nikhil.nani.diy.collections;
 
+import org.eclipse.collections.api.block.procedure.Procedure;
+import org.eclipse.collections.api.block.procedure.primitive.ObjectIntProcedure;
 import org.eclipse.collections.api.map.primitive.MutableObjectIntMap;
 import org.eclipse.collections.impl.block.factory.primitive.IntToIntFunctions;
 import org.eclipse.collections.impl.factory.primitive.ObjectIntMaps;
@@ -48,5 +50,21 @@ public class Bag<T>
         {
             this.backingMap.remove(element);
         }
+    }
+
+    public void forEach(Procedure<T> procedure)
+    {
+        this.backingMap.forEachKeyValue((element, occurrences) ->
+        {
+            for (int i = 0; i < occurrences; i++)
+            {
+                procedure.value(element);
+            }
+        });
+    }
+
+    public void forEachWithOccurrences(ObjectIntProcedure<T> procedure)
+    {
+        this.backingMap.forEachKeyValue(procedure);
     }
 }
