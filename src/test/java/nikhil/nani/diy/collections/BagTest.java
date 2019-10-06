@@ -1,112 +1,151 @@
 package nikhil.nani.diy.collections;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.factory.Lists;
-import org.eclipse.collections.impl.factory.Maps;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class BagTest
 {
-    // Create Bag
+    @Test
+    public void countLetters()
+    {
+        // Reference https://gist.github.com/JosePaumard/ba9d255ebb1b68b76639681d510f3c71
+
+        String testString = "the quick brown fox jumps over the lazy dog";
+        Map<String, Long> map = testString.chars()
+                .filter(Character::isLetter)
+                .mapToObj(each -> String.valueOf((char) each))
+                .collect(Collectors.groupingBy(each -> each, Collectors.counting()));
+
+        Assert.assertEquals(26, map.size());
+        Assert.assertEquals(35,
+                map.values().stream().mapToInt(Long::intValue).sum());
+
+    }
+
     @Test
     public void createBag()
     {
-        Bag<String> bag1 = new Bag();
-        Assert.assertNotNull(bag1);
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
 
-        Bag<String> bag2 = Bag.newBagWith("Apples", "Bananas", "Oranges");
-        Assert.assertNotNull(bag2);
+        Bag<String> bag = new Bag(apple, banana, orange, apple);
+
+        Assert.assertEquals(2, bag.getOccurrences(apple));
+        Assert.assertEquals(1, bag.getOccurrences(banana));
+        Assert.assertEquals(1, bag.getOccurrences(orange));
+        Assert.assertEquals(4, bag.size());
+        Assert.assertEquals(3, bag.sizeDistinct());
     }
 
-    // getOccurrences
     @Test
-    public void getOccurrences()
+    public void addOccurrencesBag()
     {
-        Bag<String> bag = Bag.newBagWith("Apples", "Apples", "Bananas", "Oranges");
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
 
-        int appleCount = bag.getOccurrences("Apples");
-        Assert.assertEquals(2, appleCount);
+        Bag<String> bag = new Bag(apple, banana, orange, orange, orange, apple);
 
-        Assert.assertEquals(1, bag.getOccurrences("Bananas"));
+        Assert.assertEquals(2, bag.getOccurrences(apple));
+        Assert.assertEquals(1, bag.getOccurrences(banana));
+        Assert.assertEquals(3, bag.getOccurrences(orange));
+        Assert.assertEquals(6, bag.size());
+        Assert.assertEquals(3, bag.sizeDistinct());
+
+        bag.addOccurrences(orange, 4);
+        bag.addOccurrences("strawberry", 12);
+        Assert.assertEquals(7, bag.getOccurrences(orange));
+        Assert.assertEquals(12, bag.getOccurrences("strawberry"));
+        Assert.assertEquals(22, bag.size());
+        Assert.assertEquals(4, bag.sizeDistinct());
+
+        bag.addOccurrence("strawberry");
+        Assert.assertEquals(13, bag.getOccurrences("strawberry"));
     }
 
-    // add, addOccurrences
     @Test
-    public void add_addOccurrences()
+    public void removeOccurrencesBag()
     {
-        Bag<String> bag = Bag.newBagWith("Apples", "Apples", "Bananas", "Oranges");
-        Assert.assertEquals(2, bag.getOccurrences("Apples"));
-        Assert.assertEquals(1, bag.getOccurrences("Bananas"));
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
 
-        bag.add("Bananas");
-        Assert.assertEquals(2, bag.getOccurrences("Bananas"));
-        bag.addOccurrences("Bananas", 4);
-        Assert.assertEquals(6, bag.getOccurrences("Bananas"));
+        Bag<String> bag = new Bag(apple, banana, orange, orange, orange, apple);
+
+        Assert.assertEquals(2, bag.getOccurrences(apple));
+        Assert.assertEquals(1, bag.getOccurrences(banana));
+        Assert.assertEquals(3, bag.getOccurrences(orange));
+        Assert.assertEquals(6, bag.size());
+        Assert.assertEquals(3, bag.sizeDistinct());
+
+        bag.removeOccurrence(orange);
+        Assert.assertEquals(2, bag.getOccurrences(orange));
+        Assert.assertEquals(5, bag.size());
+        Assert.assertEquals(3, bag.sizeDistinct());
+
+        bag.removeOccurrence(orange);
+        bag.removeOccurrence(orange);
+        bag.removeOccurrence(orange);
+
+        Assert.assertEquals(0, bag.getOccurrences(orange));
+        Assert.assertEquals(3, bag.size());
+        Assert.assertEquals(2, bag.sizeDistinct());
     }
 
-    // remove, removeOccurrences
     @Test
-    public void remove_removeOccurrences()
+    public void removeOccurrencesBag2()
     {
-        Bag<String> bag = Bag.newBagWith();
-        bag.addOccurrences("Apple", 12);
-        bag.addOccurrences("Banana", 6);
-        bag.addOccurrences("Orange", 1);
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
 
-        Assert.assertEquals(12, bag.getOccurrences("Apple"));
-        Assert.assertEquals(6, bag.getOccurrences("Banana"));
-        Assert.assertEquals(1, bag.getOccurrences("Orange"));
+        Bag<String> bag = new Bag(apple, banana, orange, orange, orange, apple);
 
-        bag.removeOccurrence("Apple");
-        Assert.assertEquals(11, bag.getOccurrences("Apple"));
+        Assert.assertEquals(2, bag.getOccurrences(apple));
+        Assert.assertEquals(1, bag.getOccurrences(banana));
+        Assert.assertEquals(3, bag.getOccurrences(orange));
+        Assert.assertEquals(6, bag.size());
+        Assert.assertEquals(3, bag.sizeDistinct());
 
-        bag.removeOccurrences("Banana", 2);
-        Assert.assertEquals(4, bag.getOccurrences("Banana"));
-
-        bag.removeOccurrence("Orange");
-        Assert.assertEquals(0, bag.getOccurrences("Orange"));
-
-        bag.removeOccurrence("Orange");
-        Assert.assertEquals(0, bag.getOccurrences("Orange"));
-
-        bag.removeOccurrences("Banana", 6);
-        Assert.assertEquals(0, bag.getOccurrences("Banana"));
+        bag.removeOccurrences(orange, 4);
+        Assert.assertEquals(0, bag.getOccurrences(orange));
+        Assert.assertEquals(3, bag.size());
+        Assert.assertEquals(2, bag.sizeDistinct());
     }
 
-    // forEach
-    @Test
-    public void forEach()
-    {
-        Bag<String> bag = Bag.newBagWith();
-        bag.addOccurrences("Apple", 12);
-        bag.addOccurrences("Banana", 6);
-        bag.addOccurrences("Orange", 1);
-
-        MutableList<String> list = Lists.mutable.empty();
-        bag.forEach(list::add);
-
-        Assert.assertEquals(12, list.count(each -> each.equals("Apple")));
-        Assert.assertEquals(6, list.count(each -> each.equals("Banana")));
-        Assert.assertEquals(1, list.count(each -> each.equals("Orange")));
-    }
-
-    // forEachWithOccurrencesTest
     @Test
     public void forEachWithOccurrences()
     {
-        Bag<String> bag = Bag.newBagWith();
-        bag.addOccurrences("Apple", 12);
-        bag.addOccurrences("Banana", 6);
-        bag.addOccurrences("Orange", 1);
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
 
-        Map<String, Integer> map = Maps.mutable.empty();
-        bag.forEachWithOccurrences((each, occurrences) -> map.put(each, occurrences));
+        Bag<String> bag = new Bag(apple, banana, orange);
 
-        Assert.assertEquals(Integer.valueOf(12), map.get("Apple"));
-        Assert.assertEquals(Integer.valueOf(6), map.get("Banana"));
-        Assert.assertEquals(Integer.valueOf(1), map.get("Orange"));
+        StringBuilder builder = new StringBuilder();
+
+        bag.forEachWithOccurrences((each, occurrences)
+                -> builder.append(each).append(":").append(occurrences));
+        Assert.assertTrue(builder.toString().contains("apple:1"));
+    }
+
+    @Test
+    public void forEach()
+    {
+        String apple = "apple";
+        String banana = "banana";
+        String orange = "orange";
+
+        Bag<String> bag = new Bag(apple, banana, orange, apple);
+
+        StringBuilder builder = new StringBuilder();
+
+        bag.forEach(each -> builder.append(each).append(", "));
+        Assert.assertTrue(builder.toString().contains("apple, apple"));
+        Assert.assertTrue(builder.toString().contains("banana, "));
     }
 }

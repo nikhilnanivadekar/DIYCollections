@@ -1,70 +1,98 @@
 package nikhil.nani.diy.collections;
 
-import org.eclipse.collections.api.block.procedure.Procedure;
-import org.eclipse.collections.api.block.procedure.primitive.ObjectIntProcedure;
-import org.eclipse.collections.api.map.primitive.MutableObjectIntMap;
-import org.eclipse.collections.impl.block.factory.primitive.IntToIntFunctions;
-import org.eclipse.collections.impl.factory.primitive.ObjectIntMaps;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Bag<T>
 {
-    MutableObjectIntMap<T> backingMap = ObjectIntMaps.mutable.empty();
+    private Map<T, Integer> backingMap = new HashMap<>();
+    private int size = 0;
 
     public Bag(T... elements)
     {
-        for (int i = 0; i < elements.length; i++)
+        // TODO implement constructor
+        for (T element : elements)
         {
-            this.backingMap.updateValue(elements[i], 0, IntToIntFunctions.increment());
+            backingMap.merge(element, 1, (existingCount, e) -> existingCount + 1);
+            size++;
         }
     }
 
-    public static <T> Bag<T> newBagWith(T... elements)
+    public int size()
     {
-        return new Bag<>(elements);
+        // TODO implement size
+        return this.size;
+    }
+
+    public int sizeDistinct()
+    {
+        // TODO implement sizeDistinct
+        return this.backingMap.size();
     }
 
     public int getOccurrences(T element)
     {
-        return this.backingMap.get(element);
+        // TODO implement getOccurrences
+        return this.backingMap.getOrDefault(element, 0);
     }
 
-    public void add(T element)
+    public int addOccurrence(T element)
     {
-        this.addOccurrences(element, 1);
+        return this.addOccurrences(element, 1);
     }
 
-    public void addOccurrences(T element, int occurrences)
+    public int addOccurrences(T element, int occurrences)
     {
-        this.backingMap.updateValue(element, 0, IntToIntFunctions.add(occurrences));
+        // TODO implement addOccurrences
+        size = size + occurrences;
+        return backingMap.merge(element, occurrences, (existingCount, e) -> existingCount + occurrences);
     }
 
-    public void removeOccurrence(T element)
+    public boolean removeOccurrence(T element)
     {
-        this.removeOccurrences(element, 1);
+        // TODO implement removeOccurrence
+        return this.removeOccurrences(element, 1);
     }
 
-    public void removeOccurrences(T element, int occurrences)
+    public boolean removeOccurrences(T element, int occurrences)
     {
-        int value = this.backingMap.updateValue(element, 0, IntToIntFunctions.subtract(occurrences));
-        if (value < 0)
+        Integer existing = backingMap.get(element);
+        if (existing != null)
         {
-            this.backingMap.remove(element);
-        }
-    }
-
-    public void forEach(Procedure<T> procedure)
-    {
-        this.backingMap.forEachKeyValue((element, occurrences) ->
-        {
-            for (int i = 0; i < occurrences; i++)
+            Integer newCount = existing - occurrences;
+            if (newCount <= 0)
             {
-                procedure.value(element);
+                this.backingMap.remove(element);
+                size = size - existing;
+            }
+            else
+            {
+                this.backingMap.put(element, newCount);
+                size = size - occurrences;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void forEachWithOccurrences(BiConsumer<T, Integer> biConsumer)
+    {
+        // TODO implement forEachWithOccurrences
+        this.backingMap.forEach(biConsumer);
+    }
+
+    public void forEach(Consumer<T> consumer)
+    {
+        // TODO implement forEach
+        this.backingMap.forEach((each, count) ->
+        {
+            for (int i = 0; i < count; i++)
+            {
+                consumer.accept(each);
+
             }
         });
-    }
-
-    public void forEachWithOccurrences(ObjectIntProcedure<T> procedure)
-    {
-        this.backingMap.forEachKeyValue(procedure);
     }
 }
